@@ -98,5 +98,10 @@ namespace BEPUik
         /// Clears out the accumulated impulse.
         /// </summary>
         protected internal abstract void ClearAccumulatedImpulses();
+
+        /// <summary>
+        /// A user object that the client can set. This is not used by this library.
+        /// </summary>
+        public Object UserObject { get; set; }
     }
 }

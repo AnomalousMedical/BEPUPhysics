@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using BEPUphysics.CollisionTests;
 using BEPUutilities.DataStructures;
+#if !LITE_EMBEDDED_LIB
 using BEPUutilities.ResourceManagement;
+#endif
 
 namespace BEPUutilities
 {
@@ -1255,6 +1257,7 @@ namespace BEPUutilities
             }
         }
 
+#if !LITE_EMBEDDED_LIB
         /// <summary>
         /// Determines the closest point on a tetrahedron to a provided point p.
         /// </summary>
@@ -1402,6 +1405,7 @@ namespace BEPUutilities
             CommonResources.GiveBack(subsimplexCandidate);
             CommonResources.GiveBack(baryCoordsCandidate);
         }
+#endif
 
         #endregion
 
