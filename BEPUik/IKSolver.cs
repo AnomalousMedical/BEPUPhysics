@@ -83,11 +83,31 @@ namespace BEPUik
         /// Updates the positions of bones acted upon by the joints given to this solver.
         /// This variant of the solver can be used when there are no goal-driven controls in the simulation.
         /// This amounts to running just the 'fixer iterations' of a normal control-driven solve.
+        /// This version is based on a list of joints.
         /// </summary>
         public void Solve(List<IKJoint> joints)
         {
             ActiveSet.UpdateActiveSet(joints);
+            CommonFixerSolve();
+        }
 
+        /// <summary>
+        /// Updates the positions of bones acted upon by the joints given to this solver.
+        /// This variant of the solver can be used when there are no goal-driven controls in the simulation.
+        /// This amounts to running just the 'fixer iterations' of a normal control-driven solve.
+        /// /// This version is based on a list of bones.
+        /// </summary>
+        public void Solve(List<Bone> bones)
+        {
+            ActiveSet.UpdateActiveSet(bones);
+            CommonFixerSolve();
+        }
+
+        /// <summary>
+        /// The common phase for the solve functions that take joints and bones.
+        /// </summary>
+        private void CommonFixerSolve()
+        {
             //Reset the permutation index; every solve should proceed in exactly the same order.
             permutationMapper.PermutationIndex = 0;
 
