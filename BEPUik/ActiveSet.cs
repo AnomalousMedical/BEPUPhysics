@@ -407,6 +407,60 @@ namespace BEPUik
             joints.Clear();
         }
 
+        internal void UpdateActiveSet(List<Bone> passedBones)
+        {
+            //Clear out the previous active set to make way for the new active set.   
+            //Note that the below flag clearing and usage creates a requirement.
+            //Two IKSolvers cannot operate on the same graph; the active set flags could be corrupted.
+            Clear();
+
+            foreach (Bone bone in passedBones)
+            {
+                bonesToVisit.Enqueue(bone);
+                //Note that a bone is added to the visited bone set before it is actually processed.
+                //This prevents a bone from being put in the queue redundantly.
+                bone.IsActive = true;
+                bones.Add(bone);
+            }
+
+            //Note that it's technically possible for multiple controls to affect the same bone.
+            //The containment tests will stop it from adding in any redundant constraints as a result.
+            while (bonesToVisit.Count > 0)
+            {
+                var bone = bonesToVisit.Dequeue();
+                foreach (var joint in bone.joints)
+                {
+                    if (!joint.IsActive)
+                    {
+                        joint.IsActive = true;
+                        //This is the first time the joint has been visited, so plop it into the list.
+                        joints.Add(joint);
+                    }
+                    Bone boneToAdd = joint.ConnectionA == bone ? joint.ConnectionB : joint.ConnectionA;
+                    if (!boneToAdd.Pinned && //Pinned bones act as dead ends! Don't try to traverse them.
+                        !boneToAdd.IsActive) //Don't try to add a bone if it's already active.
+                    {
+                        boneToAdd.IsActive = true;
+                        //The bone was not already present in the active set. We should visit it!
+                        //Note that a bone is added to the visited bone set before it is actually processed.
+                        //This prevents a bone from being put in the queue redundantly.
+                        bonesToVisit.Enqueue(boneToAdd);
+                        bones.Add(boneToAdd);
+                    }
+                }
+            }
+
+            //Use an arbitrary mass for the bones.
+            //This could conceivably encounter issues with pathological cases, but we don't have controls to easily guide a better choice.
+            if (UseAutomass)
+            {
+                for (int i = 0; i < bones.Count; ++i)
+                {
+                    bones[i].Mass = automassTarget;
+                }
+            }
+        }
+
         internal void UpdateActiveSet(List<IKJoint> joints)
         {
             //Clear out the previous active set to make way for the new active set.   
